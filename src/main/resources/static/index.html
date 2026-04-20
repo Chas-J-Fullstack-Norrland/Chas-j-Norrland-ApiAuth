@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Security Demo</title>
+</head>
+<body>
+
+<h1>Security Demo</h1>
+
+<h2>JWT Login</h2>
+<input id="user" placeholder="username">
+<input id="pass" placeholder="password" type="password">
+<button onclick="login()">Login (JWT)</button>
+
+<h2>OAuth2 Login</h2>
+<a href="/oauth2/authorization/github">Login with GitHub</a>
+
+<h2>Actions</h2>
+<button onclick="getPublic()">Get Public</button>
+<button onclick="getPrivate()">Get Private</button>
+
+<script>
+let token = "";
+
+async function login() {
+    const res = await fetch('/login', {
+        method: 'POST',
+        body: JSON.stringify({
+            username: document.getElementById('user').value,
+            password: document.getElementById('pass').value
+        })
+    });
+
+    token = await res.text();
+    console.log("TOKEN:", token);
+}
+
+async function getPublic() {
+    const res = await fetch('/public');
+    console.log(await res.json());
+}
+
+async function getPrivate() {
+    const res = await fetch('/private', {
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    });
+    console.log(await res.json());
+}
+</script>
+
+</body>
+</html>
