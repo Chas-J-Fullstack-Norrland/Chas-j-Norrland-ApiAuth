@@ -4,7 +4,7 @@ package com.example.demo.model;
 import jakarta.persistence.*;
 
 @Entity
-public class User {
+public class AppUser { //renamed due to user being reserved keyword
 
     @Id
     @GeneratedValue
