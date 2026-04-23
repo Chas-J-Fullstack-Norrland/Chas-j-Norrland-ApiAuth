@@ -13,34 +13,29 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final JwtUtil jwtUtil;
+    private final JwtFilter jwtFilter;
 
-    public SecurityConfig(JwtUtil jwtUtil) {
-        this.jwtUtil = jwtUtil;
-    }
-
-    @Bean
-    public JwtFilter jwtFilter() {
-        return new JwtFilter(jwtUtil);
+    public SecurityConfig(JwtFilter jwtFilter) {
+        this.jwtFilter = jwtFilter;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(AbstractHttpConfigurer::disable)
+        http.csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/index.html", "/public", "/login").permitAll()
+                .requestMatchers("/", "/index.html", "/public","/register" , "/login").permitAll()
                 .anyRequest().authenticated()
             )
+                /* Technically this is a statebased authentication method by default unless we handle it.
             .oauth2Login(oauth2 -> oauth2
                 .defaultSuccessUrl("/index.html", true)
             )
-            .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class)
+                 */
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
             // TODO:
-            // Lägg till JWT filter
             // Lägg till oauth2Login()
-        ;
+
 
         return http.build();
     }
