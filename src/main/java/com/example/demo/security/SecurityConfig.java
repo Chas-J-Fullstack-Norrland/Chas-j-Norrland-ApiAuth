@@ -14,8 +14,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
+    private final OAuth2SuccessHandler oAuthHandler;
 
-    public SecurityConfig(JwtFilter jwtFilter) {
+    public SecurityConfig(JwtFilter jwtFilter,OAuth2SuccessHandler oAuthHandler) {
+        this.oAuthHandler = oAuthHandler;
         this.jwtFilter = jwtFilter;
     }
 
@@ -24,14 +26,11 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/index.html", "/public","/register" , "/login").permitAll()
-                .anyRequest().authenticated()
-            )
-                /* Technically this is a statebased authentication method by default unless we handle it.
-            .oauth2Login(oauth2 -> oauth2
-                .defaultSuccessUrl("/index.html", true)
-            )
-                 */
+                .requestMatchers("/", "/public","/register" , "/login").permitAll()
+                .anyRequest().authenticated())
+                .oauth2Login(oauth -> oauth
+                        .successHandler(oAuthHandler)
+                )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
             // TODO:
             // Lägg till oauth2Login()
