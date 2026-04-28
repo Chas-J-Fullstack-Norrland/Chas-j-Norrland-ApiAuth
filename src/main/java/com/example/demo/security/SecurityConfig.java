@@ -35,7 +35,7 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((req, res, e) -> {
                                     res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                                    res.getWriter().write("Unauthorized, please log in via /oauth2/authorization/github");
+                                    res.getWriter().write("Unauthorized, please log in via /login or /oauth2/authorization/github");
                                 }
                         )
                 )
