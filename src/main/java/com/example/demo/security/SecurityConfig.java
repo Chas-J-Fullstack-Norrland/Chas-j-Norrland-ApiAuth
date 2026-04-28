@@ -1,6 +1,7 @@
 
 package com.example.demo.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.*;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,10 +27,17 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/public","/register" , "/login").permitAll()
+                .requestMatchers("/", "/public","/register" , "/login","/oauth2/**").permitAll()
                 .anyRequest().authenticated())
                 .oauth2Login(oauth -> oauth
                         .successHandler(oAuthHandler)
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((req, res, e) -> {
+                                    res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                                    res.getWriter().write("Unauthorized, please log in via /oauth2/authorization/github");
+                                }
+                        )
                 )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
             // TODO:
