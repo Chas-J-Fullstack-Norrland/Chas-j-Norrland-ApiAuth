@@ -82,12 +82,12 @@ public class JWTAuthFlowTests {
     public String getToken(String user, String pass){
 
         HttpHeaders headers =  new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        MultiValueMap<String,String> body = new LinkedMultiValueMap<>();
-        body.add("username",user);
-        body.add("password",pass);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        Map<String,String> body = new HashMap<>();
+        body.put("username",user);
+        body.put("password",pass);
 
-        HttpEntity<MultiValueMap<String,String>> request =
+        HttpEntity<Map<String,String>> request =
                 new HttpEntity<>(body,headers);
 
         ResponseEntity<String> response = restTemplate.postForEntity("/login",request,String.class);

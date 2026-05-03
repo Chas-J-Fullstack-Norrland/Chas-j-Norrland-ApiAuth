@@ -2,6 +2,7 @@
 package com.example.demo.controller;
 import com.example.demo.model.AppUser;
 import com.example.demo.repo.UserRepository;
+import com.example.demo.requestbody.CredentialsRequest;
 import com.example.demo.security.JwtUtil;
 import org.springframework.security.authentication.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,11 +21,11 @@ public class AuthController {
 
     //Needed since we added in password encryption while the assignment assumed none
     @PostMapping("/register")
-    public String register(@RequestParam String username, @RequestParam String password){
+    public String register(@RequestBody CredentialsRequest request){
 
         AppUser appUser = new AppUser();
-        appUser.setUsername(username);
-        appUser.setPassword(encoder.encode(password));
+        appUser.setUsername(request.username());
+        appUser.setPassword(encoder.encode(request.password()));
         try{
             AppUser newAppUser = repo.save(appUser);
         } catch (Exception e) {
@@ -37,12 +38,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam String username, @RequestParam String password) {
+    public String login(@RequestBody CredentialsRequest request) {
 
         //authenticationManager.authenticate( new UsernamePasswordAuthenticationToken()
         //does the same thing as the next 4 lines but returns the authentication we are supposed to arrive to with JWT
-        AppUser appUser = repo.findByUsername(username).orElseThrow(()-> new BadCredentialsException("Username and Password didnt match"));
-        if(!encoder.matches(password, appUser.getPassword())){
+        AppUser appUser = repo.findByUsername(request.username()).orElseThrow(()-> new BadCredentialsException("Username and Password didnt match"));
+        if(!encoder.matches(request.password(), appUser.getPassword())){
             throw new BadCredentialsException("Username or Password Didn't match");
         }
         //2. Om vi kommer hit = Login OK

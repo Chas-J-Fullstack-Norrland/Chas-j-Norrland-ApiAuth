@@ -3,6 +3,7 @@ package com.example.demo.security;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.*;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -25,18 +26,26 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/public","/register" , "/login","/oauth2/**").permitAll()
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/","/index.html", "/public","/register" , "/login","/oauth2/**").permitAll()
                 .anyRequest().authenticated())
                 .oauth2Login(oauth -> oauth
                         .successHandler(oAuthHandler)
                 )
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint((req, res, e) -> {
+                        .authenticationEntryPoint((req, res, authException) -> {
                             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            res.setContentType("text/plain");
-                            res.getWriter().write("Unauthorized, please log in via /login or /oauth2/authorization/github");
+                            res.setContentType("application/json");
+                            res.getWriter().write("""
+            {
+              "error": "unauthorized"
+            }
+        """);
                         })
                 )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

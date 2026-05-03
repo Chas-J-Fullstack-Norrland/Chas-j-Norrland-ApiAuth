@@ -18,23 +18,24 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     }
 
     @Override
-    public void onAuthenticationSuccess(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            Authentication authentication) throws IOException {
+    public void onAuthenticationSuccess(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        Authentication authentication)
+            throws IOException {
 
         OAuth2User user = (OAuth2User) authentication.getPrincipal();
 
-        String githubUsername = user.getAttribute("login");
+        String username = user.getAttribute("login");
 
-        if (githubUsername == null) {
-            githubUsername = user.getName();
+        String token = jwtUtil.generateToken(username);
+
+        // kill session
+        if (request.getSession(false) != null) {
+            request.getSession().invalidate();
         }
 
-        String token = jwtUtil.generateToken(githubUsername);
-
-        response.setContentType("application/json");
-        response.getWriter().write("{\"token\":\"" + token + "\"}");
+        // redirect with token
+        response.sendRedirect("http://localhost:8080?token=" + token);
     }
 
 }

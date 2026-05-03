@@ -23,9 +23,26 @@
 <script>
 let token = "";
 
+const params = new URLSearchParams(window.location.search);
+const oauthToken = params.get("token");
+
+if (oauthToken) {
+    token = oauthToken;
+    localStorage.setItem("token", token);
+
+    // clean URL
+    window.history.replaceState({}, document.title, "/index.html");
+
+    console.log("OAuth2 TOKEN:", token);
+}
+
+
 async function login() {
     const res = await fetch('/login', {
         method: 'POST',
+        headers: {
+        "Content-Type": "application/json"
+        },
         body: JSON.stringify({
             username: document.getElementById('user').value,
             password: document.getElementById('pass').value
@@ -45,8 +62,10 @@ async function getPrivate() {
     const res = await fetch('/private', {
         headers: {
             "Authorization": "Bearer " + token
-        }
+        },
+        credentials: "omit"
     });
+
     console.log(await res.json());
 }
 </script>
